@@ -1,7 +1,7 @@
 ﻿# Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Roman Boiar](https://up.htmlacademy.ru/javascript/11/user/221412).
-* Наставник: `Игорь Тараканов`.
+* Наставник: [Игорь Тараканов](https://htmlacademy.ru/profile/id487569).
 
 ---
 
