@@ -1,5 +1,7 @@
 'use strict';
 
+var ESC_KEYCODE = 27;
+var ENTER_KEYCODE = 13;
 var PICTURES_COUNT = 25;
 var COMMENTS = [
   'Всё отлично!',
@@ -9,6 +11,30 @@ var COMMENTS = [
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
+
+var galleryOverlay = document.querySelector('.gallery-overlay');
+var galleryOverlayClose = galleryOverlay.querySelector('.gallery-overlay-close');
+
+function onPopupEscPress(evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    closePopup();
+  }
+}
+
+function closePopup() {
+  galleryOverlay.classList.add('hidden');
+  document.removeEventListener('keydown', onPopupEscPress);
+}
+
+galleryOverlayClose.addEventListener('click', function() {
+  closePopup();
+});
+
+galleryOverlayClose.addEventListener('keydown', function(evt) {
+  if (evt.keyCode === ENTER_KEYCODE) {
+    closePopup();
+  }
+});
 
 function getRandomElement(array) {
   return array[Math.floor(Math.random() * array.length)];
@@ -31,19 +57,28 @@ function createPictureElement(picture) {
   pictureElement.querySelector('.picture-likes').innerHTML = picture.likes;
   pictureElement.querySelector('.picture-comments').innerHTML = picture.comments.length;
 
+  pictureElement.querySelector('a').onclick = function(evt) {
+    if (evt.type === 'click' || evt.keyCode === ENTER_KEYCODE) {
+      evt.preventDefault();
+      document.addEventListener('keydown', onPopupEscPress);
+    }
+    fillPhotoToOverlay(picture);
+  };
+
   return pictureElement;
 }
 
-var fragment = document.createDocumentFragment();
-for (var i = 0; i < PICTURES_COUNT; i++) {
-  var picture = createPictureObject(i + 1);
-  fragment.appendChild(createPictureElement(picture));
-
+function fillPhotoToOverlay(picture) {
   var galeryOverlay = document.querySelector('.gallery-overlay');
   galeryOverlay.classList.remove('hidden');
   galeryOverlay.querySelector('.gallery-overlay-image').src = picture.url;
   galeryOverlay.querySelector('.likes-count').innerHTML = picture.likes;
   galeryOverlay.querySelector('.comments-count').innerHTML = picture.comments.length;
 }
-document.querySelector('.pictures').appendChild(fragment);
 
+var fragment = document.createDocumentFragment();
+for (var i = 0; i < PICTURES_COUNT; i++) {
+  var picture = createPictureObject(i + 1);
+  fragment.appendChild(createPictureElement(picture));
+}
+document.querySelector('.pictures').appendChild(fragment);
