@@ -14,7 +14,6 @@ var COMMENTS = [
 
 var MIN_VALUE = 25;
 var MAX_VALUE = 100;
-var MIN_LENGTH_HASHTAGS = 2;
 var MAX_LENGTH_HASHTAGS = 20;
 var MAX_HASHTAGS = 5;
 var BORDER_RED = '2px solid red';
@@ -114,6 +113,10 @@ function validityHashtags() {
     return false;
   }
 
+  for (var j = arrayHashtags.length - 1; j >= 0; j--) {
+    arrayHashtags[j] = uploadFormHashtags.value.toLowerCase();
+  }
+
   for (var i = arrayHashtags.length - 1; i >= 0; i--) {
     if (arrayHashtags[i][0] !== '#') {
       uploadFormHashtags.setCustomValidity('Хэш-тег начинается с символа `#` (решётка) и состоит из одного слова');
@@ -121,10 +124,6 @@ function validityHashtags() {
     }
     if (arrayHashtags[i].length > MAX_LENGTH_HASHTAGS) {
       uploadFormHashtags.setCustomValidity('Максимальная длина одного хэш-тега 20 символов');
-      return false;
-    }
-    if (arrayHashtags[i].length < MIN_LENGTH_HASHTAGS) {
-      uploadFormHashtags.setCustomValidity('Минимальная длина одного хэш-тега не менее 2 символов');
       return false;
     }
     if (arrayHashtags.indexOf(arrayHashtags[i]) !== i) {
