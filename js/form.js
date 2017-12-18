@@ -12,6 +12,7 @@ var COMMENTS = [
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
 
+var SCALE_STEP = 25; //-------------------- ???
 var MIN_VALUE = 25;
 var MAX_VALUE = 100;
 var MAX_LENGTH_HASHTAGS = 20;
@@ -31,6 +32,7 @@ var uploadOverlay = uploadSelectImage.querySelector('.upload-overlay');
 var uploadEffectControls = uploadOverlay.querySelector('.upload-effect-controls');
 var uploadFormSubmit = uploadOverlay.querySelector('.upload-form-submit');
 var uploadFormHashtags = uploadOverlay.querySelector('.upload-form-hashtags');
+var uploadForm = document.querySelector('.upload-form');
 
 selectFile.addEventListener('change', function(evt) {
   document.querySelector('.upload-overlay').classList.remove('hidden');
@@ -144,3 +146,121 @@ function deleteRedBorder() {
   uploadFormHashtags.style.border = '';
   uploadFormDescription.style.border = '';
 }
+
+//module5-task2
+
+var slider = uploadForm.querySelector('.upload-effect-level');
+var sliderPin = slider.querySelector('.upload-effect-level-pin');
+var sliderValue = slider.querySelector('.upload-effect-level-value');
+var sliderConnect = slider.querySelector('.upload-effect-level-val');
+var SLIDER_WIDTH = 455;
+var FILTERS = {
+  chrome: {
+    style: 'grayscale',
+    range: [0, 1]
+  },
+  sepia: {
+    style: 'sepia',
+    range: [0, 1]
+  },
+  marvin: {
+    style: 'invert',
+    range: [0, 1],
+    percent: true
+  },
+  phobos: {
+    style: 'blur',
+    range: [0, 3],
+    pixels: true
+  },
+  heat: {
+    style: 'brightness',
+    range: [0, 3]
+  }
+};
+
+slider.classList.add('hidden');
+sliderValue.classList.add('hidden');
+
+(function setSliderDefault () {
+  sliderPin.style.left = '20%';
+  sliderConnect.style.width = '20%';
+  sliderValue.value = 20;
+  effectImagePreview.style.filter = '';
+}
+)();
+
+function getPreviewClass () {
+  var filterClass = effectImagePreview.classList.toString().split(' ')[1];
+  if (filterClass) {
+    var filterName = filterClass.split('-')[1];
+  }
+  return filterName;
+}
+
+(function showSlider () {
+  var filterName = getPreviewClass();
+  if (filterName !== 'none') {
+    slider.classList.remove('hidden');
+  } else {
+    slider.classList.add('hidden');
+  }
+}
+)();
+
+function onPinMouseDown (event) {
+  event.preventDefault();
+  var startCoords = {
+    x: event.clientX,
+    y: event.clientY
+  };
+
+  function onMouseUp () {
+    document.removeEventListener('mousemove', onPinMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  function onPinMouseMove (mouseEvt) {
+    var shift = {
+      x: startCoords.x - mouseEvt.clientX,
+      y: startCoords.y - mouseEvt.clientY
+    };
+
+    startCoords = {
+      x: mouseEvt.clientX,
+      y: mouseEvt.clientY
+    };
+
+    sliderPin.style.left = (sliderPin.offsetLeft - shift.x) / SLIDER_WIDTH * 100 + '%';
+    sliderConnect.style.width = sliderPin.style.left;
+    sliderValue.value = parseInt(sliderPin.style.left, 10);
+
+    if (parseInt(sliderPin.style.left, 10) < 0) {
+      sliderPin.style.left = 0 + '%';
+    }
+    if (parseInt(sliderPin.style.left, 10) > 100) {
+      sliderPin.style.left = 100 + '%';
+    }
+    updateSlider();
+  };
+
+  document.addEventListener('mousemove', onPinMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+};
+
+sliderPin.addEventListener('mousedown', onPinMouseDown);
+
+function updateSlider () {
+  var filterName = getPreviewClass();
+  var filter = FILTERS[filterName];
+  var value = sliderValue.value / 100 * filter.range[1];
+
+  if (filter.percent === true) {
+    value = value * 100 + '%';
+  }
+
+  if (filter.pixels === true) {
+    value += 'px';
+  }
+  effectImagePreview.style.filter = filter.style + '(' + value + ')';
+};
