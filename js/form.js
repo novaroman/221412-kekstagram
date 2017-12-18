@@ -12,7 +12,6 @@ var COMMENTS = [
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
 
-var SCALE_STEP = 25; //-------------------- ???
 var MIN_VALUE = 25;
 var MAX_VALUE = 100;
 var MAX_LENGTH_HASHTAGS = 20;
@@ -34,7 +33,7 @@ var uploadFormSubmit = uploadOverlay.querySelector('.upload-form-submit');
 var uploadFormHashtags = uploadOverlay.querySelector('.upload-form-hashtags');
 var uploadForm = document.querySelector('.upload-form');
 
-selectFile.addEventListener('change', function(evt) {
+selectFile.addEventListener('change', function (evt) {
   document.querySelector('.upload-overlay').classList.remove('hidden');
   document.querySelector('.upload-image').classList.add('hidden');
 });
@@ -42,7 +41,7 @@ selectFile.addEventListener('change', function(evt) {
 uploadFormCancel.addEventListener('click', closeEffectForm);
 
 // Функция закрытия формы кадрирования.
-function closeEffectForm() {
+function closeEffectForm () {
   document.querySelector('.upload-overlay').classList.add('hidden');
   document.querySelector('.upload-image').classList.remove('hidden');
   selectFile.value = '';
@@ -55,7 +54,7 @@ uploadFormCancel.addEventListener('keydown', function(evt) {
 });
 
 // Функция валидации комментариев.
-function validityComments() {
+function validityComments () {
   uploadFormDescription.setCustomValidity('');
 
   if (uploadFormDescription.value.length > COMMENTS_LENGTH_MAX) {
@@ -66,7 +65,7 @@ function validityComments() {
 }
 
 // Функция изменения масштаба изображения.
-function changeImageSize(indication) {
+function changeImageSize (indication) {
   var newValue = parseInt(uploadResizeControlsValue.value, 10) + 25 * indication;
   if (newValue >= MIN_VALUE && newValue <= MAX_VALUE) {
     uploadResizeControlsValue.value = newValue + '%';
@@ -85,7 +84,7 @@ increaseImageSize.addEventListener('click', function() {
 });
 
 // Функция применения эффекта к изображению.
-function changeImageEffect(event) {
+function changeImageEffect (event) {
   var target = event.target;
   var filterName = target.value;
   var defaultClass = 'effect-image-preview';
@@ -94,15 +93,18 @@ function changeImageEffect(event) {
     return;
   }
   effectImagePreview.className = defaultClass + ' ' + 'effect-' + filterName;
+  showSlider();
+  setSliderDefault();
+  updateSlider();
 }
 
 // Функция обработчика события для изменения эффектов изображению по клику.
-function clickImageEffect() {
+function clickImageEffect () {
   uploadEffectControls.addEventListener('click', changeImageEffect);
 }
 
 // Функция валидации хэш-тегов.
-function validityHashtags() {
+function validityHashtags () {
   var arrayHashtags = uploadFormHashtags.value.split(' ');
   uploadFormHashtags.setCustomValidity('');
 
@@ -137,12 +139,12 @@ function validityHashtags() {
 }
 
 // Функция добавления красной рамки.
-function addRedBorder(elem) {
+function addRedBorder (elem) {
   elem.style.border = BORDER_RED;
 }
 
 // Функция удаления красной рамки.
-function deleteRedBorder() {
+function deleteRedBorder () {
   uploadFormHashtags.style.border = '';
   uploadFormDescription.style.border = '';
 }
@@ -182,23 +184,22 @@ var FILTERS = {
 slider.classList.add('hidden');
 sliderValue.classList.add('hidden');
 
-(function setSliderDefault () {
+function setSliderDefault () {
   sliderPin.style.left = '20%';
   sliderConnect.style.width = '20%';
   sliderValue.value = 20;
   effectImagePreview.style.filter = '';
 }
-)();
 
 function getPreviewClass () {
   var filterClass = effectImagePreview.classList.toString().split(' ')[1];
   if (filterClass) {
     var filterName = filterClass.split('-')[1];
   }
-  return filterName;
+  return filterName || 'none';
 }
 
-(function showSlider () {
+function showSlider () {
   var filterName = getPreviewClass();
   if (filterName !== 'none') {
     slider.classList.remove('hidden');
@@ -206,7 +207,6 @@ function getPreviewClass () {
     slider.classList.add('hidden');
   }
 }
-)();
 
 function onPinMouseDown (event) {
   event.preventDefault();
@@ -221,26 +221,9 @@ function onPinMouseDown (event) {
   };
 
   function onPinMouseMove (mouseEvt) {
-    var shift = {
-      x: startCoords.x - mouseEvt.clientX,
-      y: startCoords.y - mouseEvt.clientY
-    };
-
-    startCoords = {
-      x: mouseEvt.clientX,
-      y: mouseEvt.clientY
-    };
-
-    sliderPin.style.left = (sliderPin.offsetLeft - shift.x) / SLIDER_WIDTH * 100 + '%';
+    sliderPin.style.left = Math.max(Math.min(sliderPin.offsetLeft + mouseEvt.movementX, SLIDER_WIDTH), 0) + 'px';
     sliderConnect.style.width = sliderPin.style.left;
     sliderValue.value = parseInt(sliderPin.style.left, 10);
-
-    if (parseInt(sliderPin.style.left, 10) < 0) {
-      sliderPin.style.left = 0 + '%';
-    }
-    if (parseInt(sliderPin.style.left, 10) > 100) {
-      sliderPin.style.left = 100 + '%';
-    }
     updateSlider();
   };
 
@@ -252,8 +235,11 @@ sliderPin.addEventListener('mousedown', onPinMouseDown);
 
 function updateSlider () {
   var filterName = getPreviewClass();
+  if (filterName === 'none') {
+    return;
+  }
   var filter = FILTERS[filterName];
-  var value = sliderValue.value / 100 * filter.range[1];
+  var value = sliderValue.value / SLIDER_WIDTH * filter.range[1];
 
   if (filter.percent === true) {
     value = value * 100 + '%';

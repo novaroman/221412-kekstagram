@@ -1,7 +1,7 @@
 'use strict';
 
 (
-  function() {
+  function () {
     // Функция заполнения блока DOM элементами на основе массива JS объектов
     window.createPictureElement = function (picture) {
       var pictureElement = document.querySelector('#picture-template').content.cloneNode(true);
@@ -20,7 +20,7 @@
     }
 
     // Функция заполения оверлея данными о первой картинке
-    function fillPhotoToOverlay(picture) {
+    function fillPhotoToOverlay (picture) {
       var galeryOverlay = document.querySelector('.gallery-overlay');
       galeryOverlay.classList.remove('hidden');
       galeryOverlay.querySelector('.gallery-overlay-image').src = picture.url;

@@ -1,9 +1,9 @@
 'use strict';
 
 (
-  function() {
+  function () {
     // Функция для получения рандомного элемента.
-    function getRandomElement(array) {
+    function getRandomElement (array) {
       return array[Math.floor(Math.random() * array.length)];
     }
 
